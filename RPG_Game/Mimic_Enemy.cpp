@@ -5,7 +5,7 @@
 Mimic_Enemy::Mimic_Enemy()
 {
 	hp = 20;
-	hpMax = 25;
+	hpMax = 20;
 	str = 5;
 	def = 1;
 	agi = 2;
