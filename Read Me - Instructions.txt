@@ -1,6 +1,7 @@
 Instruction on how to play my game!
 
-1) Launch app
+1) Launch solution
+*** Make sure you are running on x86! for some reason it won't work on x64
 
 2) choose name in console application and press enter
 
