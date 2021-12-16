@@ -1,0 +1,25 @@
+Instruction on how to play my game!
+
+1) Launch app
+
+2) choose name in console application and press enter
+
+3) when you see the game screen you should see a message "welcome to the dungeon" - Press 'Space'
+
+*** Whenever you see messages pop up, press Space to move on - you will not be able to move or take actions while messages are displayed.
+
+4) arrow keys to move character
+
+5) move to chest/enemy to have an event
+
+6) when in combat:
+	a) use up and down arrow keys to switch between 'Fight' and 'Item' buttons
+	b) press space to either attack or open item menu
+
+7) when in item menu:
+	a) use up and down arrow keys to switch between items
+	b) press space to choose an item - if you choose empty item or 'Cancel' nothing will happen
+
+Your mission, should you choose to accept it, is to KILL ALL THE ENEMIES!! and escape the dungeon.
+
+GOOD LUCK!
