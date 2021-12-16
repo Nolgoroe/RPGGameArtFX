@@ -31,5 +31,38 @@ Instruction on how to play my game!
 Your mission, should you choose to accept it, is to KILL ALL THE ENEMIES!! and escape the dungeon.
 
 12) ENJOY THE GAME!
+_____________________________________________________________________________________________
+If want to launch the game from visual studio:
+
+1) download project from git
+
+2) extract files
+
+3) go into folder
+
+4) when you see SDL2.rar / SDL2.zip - extract it
+
+5) open solution - make sure you are setting the enviroment to be x86!! - USE VISUAL STUDIO 2017!
+** don't understand why but coulden't get system to work with x64
+
+6) launch game - won't work but you need to launch it
+
+7)close visual studio
+
+8) in the folder where we extracted SDL2 we should now see another folder called "Debug"
+** if you don't see the folder, try to refresh.
+
+9) go into SDL2 -> lib -> x86
+
+10) copy all .DLL files
+
+11) go to Debug folder we talked about and paste the files in there
+
+12) open solution - make sure your visual studio 2017 and enviroment x86.
+
+13) lauch the game
+ 
+14) have fun!
+
 
 GOOD LUCK!
