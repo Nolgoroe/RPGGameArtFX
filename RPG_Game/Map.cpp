@@ -2,19 +2,17 @@
 
 
 
-Map::Map()
+Map::Map(SDL_Renderer * _renderer, Hero * _hero, ItemMenu* _itemMenu, InfoBox* _infoBox, SoundManager* _sm)
 {
-}
-
-
-Map::Map(SDL_Renderer * _renderer, Hero * _hero, int * _items)
-{
-	srand(time(NULL));
-	
+	srand(time(NULL));	
 	renderer = _renderer;
+	cout << "MAP: " << renderer << endl;
 	hero = _hero;
-	items = _items;
+	itemMenu = _itemMenu;
+	infoBox = _infoBox;
+	sm = _sm;
 
+	//set all tiles to default value
 	for (int y = 0; y < 10; y++)
 	{
 		for (int x = 0; x < 10; x++)
@@ -23,6 +21,7 @@ Map::Map(SDL_Renderer * _renderer, Hero * _hero, int * _items)
 		}
 	}
 
+	// read map.txt file
 	fstream mapFile("assets/map.txt");
 	if (mapFile.is_open())
 	{
@@ -90,70 +89,26 @@ Map::Map(SDL_Renderer * _renderer, Hero * _hero, int * _items)
 		}
 		mapFile.close();
 
+		// load all game map icons
 		heroTexture = IMG_LoadTexture(renderer, "assets/girlTile.png");
 		exitDungeonDoorTexture = IMG_LoadTexture(renderer, "assets/doorTile.png");
 		globEnemyTexture = IMG_LoadTexture(renderer, "assets/globTile.png");
 		chestTexture = IMG_LoadTexture(renderer, "assets/chestTile.png");
 
-		infoBox.setup(renderer);
-		infoBox.setText("Welcome To The Dungeon!");
-
-		sm.setup();
 	}
+}
+
+Map::Map()
+{
 }
 
 Map::~Map()
 {
-	SDL_DestroyTexture(heroTexture);
-	SDL_DestroyTexture(exitDungeonDoorTexture);
-	SDL_DestroyTexture(globEnemyTexture);
-	SDL_DestroyTexture(chestTexture);
-}
-
-void Map::itemFound()
-{
-	int itemNum = rand() % 4 + 1;
-	
-	bool freeSlotFound = false;
-
-	for (int i = 0; i < 10; i++)
-	{
-		if (items[i] == 0)
-		{
-			freeSlotFound = true;
-			items[i] = itemNum;
-			break;
-		}
-	}
-
-	if (freeSlotFound)
-	{
-		switch (itemNum)
-		{
-		case 1:
-			infoBox.setText("Found Chocolate!");
-			break;
-		case 2:
-			infoBox.setText("Found Grenade!");
-
-			break;
-		case 3:
-			infoBox.setText("Found ATK Boost!");
-
-			break;
-		case 4:
-			infoBox.setText("Found DEF Boost!");
-			break;
-		default:
-			break;
-		}
-	}
-	else 
-	{
-		infoBox.setText("No free space in bag!");
-	}
-
-	infoBox.visible = true;
+	/// QUESTION: ask Gaetan for explination about why is this beign called after constructor and how to stop it from happening
+	//SDL_DestroyTexture(heroTexture);
+	//SDL_DestroyTexture(exitDungeonDoorTexture);
+	//SDL_DestroyTexture(globEnemyTexture);
+	//SDL_DestroyTexture(chestTexture);
 }
 
 void Map::update()
@@ -168,6 +123,7 @@ void Map::update()
 		
 		if (inputEvent.type == SDL_KEYDOWN )
 		{
+			// position of hero icon on map
 			int heroX = heroIcon.x;
 			int heroY = heroIcon.y;
 
@@ -177,10 +133,11 @@ void Map::update()
 			}
 			else if (inputEvent.key.keysym.scancode == SDL_SCANCODE_SPACE)
 			{
-				infoBox.visible = false;
+				infoBox->visible = false;
 			}
 
-			if (!infoBox.visible && hero->getHP() > 0)
+			// check if plyer still alive and there are no text boxes open = player can move
+			if (!infoBox->visible && hero->getHP() > 0)
 			{
 				if (inputEvent.key.keysym.scancode == SDL_SCANCODE_RIGHT)
 				{
@@ -199,17 +156,21 @@ void Map::update()
 					heroY++;
 				}
 
+				// limit player movement
 				if (heroX >= 0 && heroX <= 9 && heroY >= 0 && heroY <= 9 && map[heroX][heroY] == 1)
 				{
 					heroIcon.x = heroX;
 					heroIcon.y = heroY;
 
+					//check win condition
 					if (!isDoorLocked && !escapedDungeon && heroIcon.x == exitDungeonDoorIcon.x && heroIcon.y == exitDungeonDoorIcon.y)
 					{
-						infoBox.setText("Escaped Dungeon!!");
-						infoBox.visible = true;
+						infoBox->setText("Escaped Dungeon!!");
+						infoBox->visible = true;
 						escapedDungeon = true;
 					}
+
+					// check event condition for each interactable ON THE SCREEN
 					for (list<MapObject>::iterator mo = mapObjectsIcons.begin(); mo != mapObjectsIcons.end(); mo++)
 					{
 						if (mo->active)
@@ -222,9 +183,12 @@ void Map::update()
 								{
 								case 3://glob enemy
 								{
-									BattleManager battle(renderer, hero, items, globEnemyType, &sm);
+									// launch battle - system goes to battleManager from here to loop until battle is over
+									BattleManager battle(renderer, hero, itemMenu, globEnemyType, sm);
 									battle.update();
-									sm.playMusicTrack(0);
+
+									//return to map here.. battle is over
+									sm->playMusicTrack(0);
 
 									if (battle.quitBattle)
 									{
@@ -232,16 +196,19 @@ void Map::update()
 									}
 									else if(hero->getHP() <= 0)
 									{
-										infoBox.setText("You died!!");
-										infoBox.visible = true;
+										infoBox->setText("You died!!");
+										infoBox->visible = true;
 									}
 									break;
 								}
 								case 4://mimic enemy
 								{
-									BattleManager battle(renderer, hero, items, mimicEnemyType, &sm);
+									// launch battle - system goes to battleManager from here to loop until battle is over
+									BattleManager battle(renderer, hero, itemMenu, mimicEnemyType, sm);
 									battle.update();
-									sm.playMusicTrack(0);
+
+									//return to map here.. battle is over
+									sm->playMusicTrack(0);
 
 									if (battle.quitBattle)
 									{
@@ -249,13 +216,14 @@ void Map::update()
 									}
 									else if (hero->getHP() <= 0)
 									{
-										infoBox.setText("You died!!");
-										infoBox.visible = true;
+										infoBox->setText("You died!!");
+										infoBox->visible = true;
 									}
 								}
 									break;
 								case 5: //chest
-									itemFound();
+									// give loot from a chest - RANDOM
+									itemMenu->itemFound();
 									break;
 								default:
 									break;
@@ -273,7 +241,8 @@ void Map::update()
 
 	}
 
-	if (!infoBox.visible && isDoorLocked)
+	// check if player can win the game = all mosters are dead and there are no visible text boxes
+	if (!infoBox->visible && isDoorLocked)
 	{
 		bool areMonstersAlive = false;
 
@@ -289,15 +258,18 @@ void Map::update()
 			}
 		}
 
+		// if ALL mosters are dead... unlock escape door
 		if (!areMonstersAlive)
 		{
 			isDoorLocked = false;
-			infoBox.setText("Escape door is unlocked!");
-			infoBox.visible = true;
+			infoBox->setText("Escape door is unlocked!");
+			infoBox->visible = true;
 		}
 	}
 
-	if (!infoBox.visible && (escapedDungeon || hero->getHP() <= 0))
+	// check lose/win condition at the end of the function to know if we must leave the game.
+	// we leave the game if the player won or died
+	if (!infoBox->visible && (escapedDungeon || hero->getHP() <= 0))
 	{
 		quitGame = true;
 	}
@@ -313,14 +285,17 @@ void Map::draw()
 		{
 			if (map[x][y] == 0)
 			{
+				// background for walls is black
 				SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 			}
 
 			if (map[x][y] == 1) 
 			{
+				// background for ground is pink
 				SDL_SetRenderDrawColor(renderer, 136, 60, 100, 255);
 			}
 
+			//grid style drawing
 			tile.x = x * tile.w;
 			tile.y = y * tile.h;
 
@@ -328,6 +303,7 @@ void Map::draw()
 		}
 	}
 
+	// draw all the map icons on screen (except hero and escape door)
 	for (MapObject mo : mapObjectsIcons)
 	{
 		if (mo.active)
@@ -352,13 +328,18 @@ void Map::draw()
 		}
 	}
 
+	//draw escape door map icon
 	tile.x = exitDungeonDoorIcon.x * tile.w;
 	tile.y = exitDungeonDoorIcon.y * tile.h;
 	SDL_RenderCopy(renderer, exitDungeonDoorTexture, NULL, &tile);
 
+	//draw hero map icon
 	tile.x = heroIcon.x * tile.w;
 	tile.y = heroIcon.y * tile.h;
 	SDL_RenderCopy(renderer, heroTexture, NULL, &tile);
 
-	infoBox.draw();
+	// draw messages that were set before the map.draw() function
+	infoBox->draw();
+
+	//SDL_RenderPresent(renderer);
 }

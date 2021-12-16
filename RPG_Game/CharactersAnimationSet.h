@@ -8,7 +8,7 @@ public:
 
 	int x, y;
 	SDL_Renderer* renderer;
-	AnimationFrame idle, attack, hit;
+	AnimationData idle, attack, hit;
 	AnimationManager animationManager;
 
 	bool isDoingAction;

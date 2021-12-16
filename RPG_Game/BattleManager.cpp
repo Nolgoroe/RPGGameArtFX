@@ -6,9 +6,9 @@ BattleManager::BattleManager()
 {
 }
 
-BattleManager::BattleManager(SDL_Renderer * _renderer, Hero * _hero, int * _items, CharacterTypes _enemyType, SoundManager* soundManager)
+BattleManager::BattleManager(SDL_Renderer * _renderer, Hero * _hero, ItemMenu* _itemMenu, CharacterTypes _enemyType, SoundManager* soundManager)
 {
-
+	//if for some reason we don't have an enemy value for the enemy - set enemy to default glob
 	if (_enemyType != globEnemyType && _enemyType != mimicEnemyType)
 	{
 		_enemyType = globEnemyType;
@@ -16,8 +16,9 @@ BattleManager::BattleManager(SDL_Renderer * _renderer, Hero * _hero, int * _item
 
 	renderer = _renderer;
 	hero = _hero;
-	items = _items;
+	itemMenu = _itemMenu;
 
+	// load fight bg textrue
 	backgroundTexture = IMG_LoadTexture(renderer, "assets/bg.png");
 
 	TTF_Font* font = TTF_OpenFont("assets/vermin_vibes_1989.ttf", 16);
@@ -27,13 +28,16 @@ BattleManager::BattleManager(SDL_Renderer * _renderer, Hero * _hero, int * _item
 	SDL_FreeSurface(textSurface);
 	TTF_CloseFont(font);
 
+	//decide on position and size of name rect for hero
 	nameRect.x = 90;
 	nameRect.y = 180;
 	SDL_QueryTexture(nameTexture, NULL, NULL, &nameRect.w, &nameRect.h);
 
+	// load animations for hero and enemy
 	heroAnimSet.setup(renderer, 47, 181, heroType);
 	enemyAnimSet.setup(renderer, 246, 114, _enemyType);
 
+	//set enemy class
 	if (_enemyType == globEnemyType)
 	{
 		enemy = new Glob_Enemy();
@@ -43,14 +47,16 @@ BattleManager::BattleManager(SDL_Renderer * _renderer, Hero * _hero, int * _item
 		enemy = new Mimic_Enemy();
 	}
 
-	heroHP.setup(renderer, 90, 194);
-	enemyHP.setup(renderer, 190, 10);
+	// setup the hp rect initial value - renderer, posX and posY
+	heroHPBar.setup(renderer, 90, 194);
+	enemyHPBar.setup(renderer, 190, 10);
 
-
+	//set up the player actipn buttons - you can set a rect directly using {} - it's a cool trick I found!
 	fightButton.setup(renderer, { 0,180,80,30 }, "Fight");
 	fightButton.isSelected = true;
 	itemButton.setup(renderer, { 0,210,80,30 }, "Item");
 
+	// check who takes action first
 	if (hero->getAGI() > enemy->getAGI())
 	{
 		isHeroesTurn = true;
@@ -60,33 +66,40 @@ BattleManager::BattleManager(SDL_Renderer * _renderer, Hero * _hero, int * _item
 		isHeroesTurn = false;
 	}
 
+	// set up the battle effect animations - renderer and position X and position Y
+	// we use the enemy position just as a default value - this changes
 	battleEffects.setup(renderer, enemyAnimSet.x, enemyAnimSet.y);
 
-
-	itemMenu.setup(renderer, items, 0, 0);
-
+	// play battle music
 	soundManager->playMusicTrack(1);
 }
 
 
 BattleManager::~BattleManager()
 {
-	SDL_DestroyTexture(backgroundTexture);
-	SDL_DestroyTexture(nameTexture);
+	//SDL_DestroyTexture(backgroundTexture);
+	//SDL_DestroyTexture(nameTexture);
 }
 
-void BattleManager::useItem()
+void BattleManager::useItem(int _itemNum)
 {
-	switch (items[itemMenu.selectedItemIndex])
+	//get item num to use then call specific animation and action
+	switch (_itemNum)
 	{
 	case 1:
+		//set the position of the animation
 		battleEffects.setXY(heroAnimSet.x, heroAnimSet.y);
+		// do the action
 		battleEffects.doHeal();
+		// update the values
 		hero->healAction(10);
 		break;
 	case 2:
 		battleEffects.setXY(enemyAnimSet.x, enemyAnimSet.y);
 		battleEffects.doExplode();
+
+		// change the damage to recieve.
+		// later in the code check if enemy damage to recieve is grater then 0 and then damage.
 		enemyRecieveDMG = 20;
 		break;
 	case 3:
@@ -104,19 +117,23 @@ void BattleManager::useItem()
 		break;
 	}
 
-	items[itemMenu.selectedItemIndex] = 0;
+	// remove item used from list of items!
+	itemMenu->getItemList()[itemMenu->selectedItemIndex] = 0;
 
+	// change turn
 	isHeroesTurn = false;
 }
 
 bool BattleManager::areAnimationsPlaying()
 {
+	//check if there in ANY ANIMATION running - if there is, return true
 	bool isAnimating = heroAnimSet.isDoingAction || enemyAnimSet.isDoingAction || battleEffects.isDoingEffect;
 	return isAnimating;
 }
 
 void BattleManager::update()
 {
+	// delta time calculation for smoother animations of seperate machines and seperate fps
 	float deltaTime = 0;
 
 	Uint32 lastUpdate = SDL_GetTicks();
@@ -145,9 +162,9 @@ void BattleManager::update()
 				{
 					if (isHeroesTurn)
 					{
-						if (itemMenu.isVisible)
+						if (itemMenu->isVisible)
 						{
-							itemMenu.moveUp();
+							itemMenu->moveUp();
 						}
 						else
 						{
@@ -160,9 +177,9 @@ void BattleManager::update()
 				{
 					if (isHeroesTurn)
 					{
-						if (itemMenu.isVisible)
+						if (itemMenu->isVisible)
 						{
-							itemMenu.moveDown();
+							itemMenu->moveDown();
 						}
 						else
 						{
@@ -175,18 +192,19 @@ void BattleManager::update()
 				{
 					if (isHeroesTurn && !areAnimationsPlaying())
 					{
-						if (itemMenu.isVisible)
+						if (itemMenu->isVisible)
 						{
-							if(itemMenu.selectedItemIndex == 10 || items[itemMenu.selectedItemIndex] == 0)
+							// if selected 'cancel' or an empty slot
+							if(itemMenu->selectedItemIndex == 10 || itemMenu->getItemList()[itemMenu->selectedItemIndex] == 0)
 							{
 								// just do nothing
 							}
 							else
 							{
-								useItem();
+								useItem(itemMenu->getItemList()[itemMenu->selectedItemIndex]);
 							}
 
-							itemMenu.isVisible = false;
+							itemMenu->isVisible = false;
 						}
 						else if (fightButton.isSelected)
 						{
@@ -196,7 +214,7 @@ void BattleManager::update()
 						}
 						else if (itemButton.isSelected)
 						{
-							itemMenu.isVisible = true;
+							itemMenu->isVisible = true;
 						}
 					}
 
@@ -211,26 +229,31 @@ void BattleManager::update()
 
 		if (!areAnimationsPlaying())
 		{
+			// lost condition player is dead
 			if (hero->getHP() <= 0 || enemy->getHP() <= 0)
 			{
 				isBattleDone = true;
 			}
 			else if (enemyRecieveDMG > 0)
 			{
+				// enemy recieve damage
 				enemy->takeDamage(enemyRecieveDMG);
 				enemyAnimSet.doHit();
 				battleEffects.setXY(enemyAnimSet.x, enemyAnimSet.y);
 				battleEffects.doHit();
 
+				//reset damage
 				enemyRecieveDMG = 0;
 			}
 			else if (heroRecieveDMG > 0)
 			{
+				// hero recieve damage
 				hero->takeDamage(heroRecieveDMG);
 				heroAnimSet.doHit();
 				battleEffects.setXY(heroAnimSet.x, heroAnimSet.y);
 				battleEffects.doHit();
 
+				//reset damage
 				heroRecieveDMG = 0;
 			}
 			else if (!isHeroesTurn)
@@ -241,19 +264,21 @@ void BattleManager::update()
 			}
 		}
 
+
+		//update hp values for health Bars
+		heroHPBar.hp = hero->getHP();
+		heroHPBar.hpMax = hero->getHPMax();
+		enemyHPBar.hp = enemy->getHP();
+		enemyHPBar.hpMax = enemy->getHPMax();
+
+		// update the character animations if there are any
 		heroAnimSet.update(deltaTime);
 		enemyAnimSet.update(deltaTime);
 
-
-		heroHP.hp = hero->getHP();
-		heroHP.hpMax = hero->getHPMax();
-
-		enemyHP.hp = enemy->getHP();
-		enemyHP.hpMax = enemy->getHPMax();
-
-
+		// update the battle effects animations if there are any
 		battleEffects.update(deltaTime);
 
+		// draw battle screen
 		draw();
 	}
 }
@@ -265,6 +290,7 @@ void BattleManager::draw()
 
 	SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
 
+	// draw the chatacter animations
 	enemyAnimSet.draw();
 	heroAnimSet.draw();
 
@@ -273,22 +299,25 @@ void BattleManager::draw()
 	SDL_Rect bottomUI = { 0,180, 320, 60 };
 	SDL_RenderFillRect(renderer, &bottomUI);
 
-	//boarder
+	//boarder for button ui
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderDrawRect(renderer, &bottomUI);
 
 
 	SDL_RenderCopy(renderer, nameTexture, NULL, &nameRect);
 
-	heroHP.draw();
-	enemyHP.draw();
+	// draw health bars
+	heroHPBar.draw();
+	enemyHPBar.draw();
 
-
+	// draw fight and item buttons
 	fightButton.draw();
 	itemButton.draw();
 
-	itemMenu.draw();
+	// draw item menu
+	itemMenu->draw();
 
+	// draw the battle animation effects
 	battleEffects.draw();
 
 	SDL_RenderPresent(renderer);

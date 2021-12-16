@@ -16,7 +16,7 @@
 #include "BattleEffectsManager.h"
 #include "ItemMenu.h"
 #include "SoundManager.h"
-
+	
 using namespace std;
 
 class BattleManager
@@ -27,8 +27,8 @@ public:
 	SDL_Texture* backgroundTexture;
 
 	Hero* hero;
-	HealthBar heroHP;
-	HealthBar enemyHP;
+	HealthBar heroHPBar;
+	HealthBar enemyHPBar;
 
 	ButtonManager fightButton;
 	ButtonManager itemButton;
@@ -37,8 +37,6 @@ public:
 	int enemyRecieveDMG = 0;
 
 	BattleEffectsManager battleEffects;
-
-	int* items;
 
 	Character* enemy;
 
@@ -52,13 +50,13 @@ public:
 	CharactersAnimationSet heroAnimSet;
 	CharactersAnimationSet enemyAnimSet;
 
-	ItemMenu itemMenu;
+	ItemMenu* itemMenu;
 
 	BattleManager();
-	BattleManager(SDL_Renderer* _renderer, Hero* _hero, int* _items, CharacterTypes _enemyType, SoundManager* soundManager);
+	BattleManager(SDL_Renderer* _renderer, Hero* _hero, ItemMenu* _itemMenu, CharacterTypes _enemyType, SoundManager* soundManager);
 	~BattleManager();
 
-	void useItem();
+	void useItem(int _itemNum);
 
 	bool areAnimationsPlaying();
 	void update();

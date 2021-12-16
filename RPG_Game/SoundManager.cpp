@@ -13,9 +13,10 @@ SoundManager::~SoundManager()
 
 void SoundManager::setup()
 {
-	//sound effects
+	//load sound effects
+	/// add lots of SFX
 
-	//music
+	//load music
 	addMusicTrack("assets/DungeonLevel.mp3");
 	addMusicTrack("assets/BattleMusic.mp3");
 

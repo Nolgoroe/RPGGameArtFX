@@ -20,7 +20,6 @@ public:
 
 	void setup(SDL_Renderer* _renderer, SDL_Rect _buttonRect, string _text);
 	void draw();
-	void drawInactive();
 
 };
 

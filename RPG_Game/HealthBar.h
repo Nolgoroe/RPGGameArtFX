@@ -1,5 +1,8 @@
 #pragma once
 #include <SDL.h>
+
+#define HEALTHBAR_PIXEL_WIDTH 100
+
 class HealthBar
 {
 public:

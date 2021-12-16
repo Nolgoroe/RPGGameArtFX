@@ -6,7 +6,7 @@
 
 using namespace std;
 
-class AnimationFrame
+class AnimationData
 {
 public:
 	int numberOfFrames;
@@ -20,7 +20,7 @@ public:
 	void setup(string spriteSheetFile, SDL_Renderer* _renderer, int _numOfFrames, float _frameDuration, int _offsetX, int _offsetY);
 
 	void draw(int _frame, int _x, int _y);
-	AnimationFrame();
-	~AnimationFrame();
+	AnimationData();
+	~AnimationData();
 };
 

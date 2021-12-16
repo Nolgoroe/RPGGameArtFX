@@ -1,8 +1,10 @@
 #pragma once
+#include <iostream>
 #include <string>
 #include <SDL.h>
 #include<SDL_ttf.h>
 
+#include "DrawManager.h"
 using namespace std;
 
 class InfoBox

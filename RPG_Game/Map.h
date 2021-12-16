@@ -20,30 +20,29 @@ class Map
 {
 public:
 	Hero* hero;
-	int* items;
-
-	SDL_Renderer* renderer;
+	ItemMenu* itemMenu;
+	SoundManager* sm;
 
 	int map[10][10];
 
 	MapObject heroIcon;
 	MapObject exitDungeonDoorIcon;
 	list<MapObject> mapObjectsIcons;
-	SoundManager sm;
 
+	SDL_Renderer* renderer;
 	SDL_Texture *heroTexture, *exitDungeonDoorTexture, *globEnemyTexture, *chestTexture;
 
 	bool quitGame = false;
 	bool escapedDungeon = false;
 	bool isDoorLocked = true;
 
-	InfoBox infoBox;
+	InfoBox* infoBox;
 
+	Map(SDL_Renderer* _renderer, Hero* _hero, ItemMenu* itemMenu, InfoBox* _infoBox, SoundManager* _sm);
 	Map();
-	Map(SDL_Renderer* _renderer, Hero* _hero, int* _items);
 	~Map();
 
-	void itemFound();
+	//void itemFound();
 
 	void update();
 	void draw();

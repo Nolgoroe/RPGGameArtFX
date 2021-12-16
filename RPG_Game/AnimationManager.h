@@ -1,10 +1,10 @@
 #pragma once
 
-#include "AnimationFrame.h"
+#include "AnimationData.h"
 class AnimationManager
 {
 public:
-	AnimationFrame* currentAnim;
+	AnimationData* currentAnim;
 	int currentFrame;
 	float frameTimer;
 	bool isAnimDone;
@@ -13,7 +13,7 @@ public:
 	AnimationManager();
 	~AnimationManager();
 
-	void changeAnim(AnimationFrame* _Anim);
+	void changeAnim(AnimationData* _Anim);
 	void setAnimToLoop(bool _isLoop);
 	void resetAnim();
 	void update(float _deltaTime);

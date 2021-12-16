@@ -19,6 +19,9 @@ void CharactersAnimationSet::setup(SDL_Renderer * _renderer, int _x, int _y, Cha
 	x = _x;
 	y = _y;
 
+	// Load all animation files into system (path, renderer, num of frames, duration, offsetX, offsetY
+	// offsetX and offsetY are offsets in the IMAGE ITSELF!
+	// instead of reading the image from top left I want to read it from middle bottom since then it's less messy to set the Destination Rect later
 	switch (_type)
 	{
 		case heroType:

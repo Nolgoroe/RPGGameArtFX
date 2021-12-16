@@ -5,7 +5,7 @@ class BattleEffectsManager
 public:
 	int x, y;
 	SDL_Renderer* renderer;
-	AnimationFrame hit, heal, explode, atkBoost, defBoost;
+	AnimationData hit, heal, explode, atkBoost, defBoost;
 	AnimationManager animationManager;
 
 	bool isDoingEffect;

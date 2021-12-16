@@ -10,10 +10,11 @@ ButtonManager::ButtonManager()
 
 ButtonManager::~ButtonManager()
 {
-	if (textTexture != NULL) 
-	{
-		SDL_DestroyTexture(textTexture);
-	}
+	/// QUESTION: ask Gaetan for explination about why is this beign called after constructor and how to stop it from happening
+	//if (textTexture != NULL) 
+	//{
+	//	SDL_DestroyTexture(textTexture);
+	//}
 }
 
 void ButtonManager::setup(SDL_Renderer * _renderer, SDL_Rect _buttonRect, string _text)
@@ -45,20 +46,6 @@ void ButtonManager::draw()
 	{
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 	}
-
-
-	SDL_RenderFillRect(renderer, &buttonRect);
-
-
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-	SDL_RenderDrawRect(renderer, &buttonRect);
-
-	SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
-}
-
-void ButtonManager::drawInactive()
-{
-	SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
 
 
 	SDL_RenderFillRect(renderer, &buttonRect);
